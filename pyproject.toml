@@ -7,8 +7,25 @@ license = "MIT"
 
 [tool.poetry.dependencies]
 python = "^3.7"
+pyramid = "^1.10"
+pyramid-sqlalchemy = "^1.6"
+deform = "^2.0"
+colander = "^1.7"
+colanderalchemy = "^0.3.3"
+pyramid-jinja2 = "^2.8"
+pyramid-tm = "^2.2"
+psycopg2-binary = "^2.7"
+sqlalchemy = "^1.2"
+alembic = "^1.0"
 
 [tool.poetry.dev-dependencies]
+flake8 = "^3.7"
+black = "=18.9b0"
+pytest = "^4.2"
+pytest-cov = "^2.6"
+pytest-randomly = "^1.2"
+webtest = "^2.0"
+waitress = "^1.2"
 
 [build-system]
 requires = ["poetry>=0.12"]
