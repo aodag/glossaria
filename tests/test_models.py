@@ -4,3 +4,4 @@ def test_it():
     p = Project(name="testing")
     g = Glossary(project=p, name="testing-word", description="this is test")
     assert g.project == p
+    assert g in p.glossaries

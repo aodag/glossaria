@@ -24,5 +24,5 @@ class Glossary(BaseObject):
     name = Column(Unicode(255))
     description = Column(UnicodeText)
     project_id = Column(Integer, ForeignKey("projects.id"))
-    project = relationship("Project")
+    project = relationship("Project", backref="glossaries")
     __table_args__ = (UniqueConstraint(name, project_id),)
