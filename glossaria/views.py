@@ -1,6 +1,8 @@
 from pyramid.view import view_config
 from pyramid.decorator import reify
+from deform import Form, ValidationFailure
 from .models import Glossary, Project, Session
+from . import schema
 
 
 @view_config(route_name="top", renderer="templates/index.html")
@@ -12,6 +14,10 @@ class GlossaryView:
     def __init__(self, context, request):
         self.context = context
         self.request = request
+
+    @reify
+    def controls(self):
+        return self.request.params.items()
 
     @reify
     def project_name(self):
@@ -30,6 +36,14 @@ class GlossaryView:
         return Glossary.query.filter(
             Glossary.name == self.glossary_name, Glossary.project == self.project
         ).first()
+
+    @reify
+    def new_form(self):
+        return Form(schema.GlossaryNewSchema())
+
+    @reify
+    def edit_form(self):
+        return Form(schema.GlossaryEditSchema())
 
     def collection_url(self):
         return self.request.route_url("glossaries", project_name=self.project_name)
@@ -50,17 +64,20 @@ class GlossaryView:
         return dict(glossary=self.glossary)
 
     def edit(self):
-        return dict(glossary=self.glossary)
+        return dict(glossary=self.glossary, form=self.edit_form)
 
     def new(self):
-        return dict(glossary=self.glossary)
+        return dict(form=self.new_form)
 
     def create(self):
+        try:
+            params = self.new_form.validate(self.controls)
+        except ValidationFailure as e:
+            return dict(form=e.field)
+
         project = self.project
         glossary = Glossary(
-            name=self.request.params["name"],
-            description=self.request.params["description"],
-            project=project,
+            name=params["name"], description=params["description"], project=project
         )
         Session.add(glossary)
         Session.flush()
@@ -69,9 +86,12 @@ class GlossaryView:
         return dict(glossary=glossary)
 
     def update(self):
-        glossary = self.glossary
+        try:
+            params = self.edit_form.validate(self.controls)
+        except ValidationFailure as e:
+            return dict(form=e.field)
 
-        params = self.request.params
+        glossary = self.glossary
         glossary.description = params["description"]
         Session.flush()
 

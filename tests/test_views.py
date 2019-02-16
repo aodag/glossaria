@@ -136,4 +136,15 @@ class TestGlossaryView:
         context = testing.DummyResource()
         view = target(context, request)
         result = view.edit()
-        assert result == {"glossary": glossary1}
+        assert result == {"glossary": glossary1, "form": view.edit_form}
+
+    def test_new(self, target, models, sql_session, config):
+        project1 = models.Project(name="testing")
+        sql_session.add(project1)
+        sql_session.flush()
+
+        request = testing.DummyRequest(matchdict={"project_name": project1.name})
+        context = testing.DummyResource()
+        view = target(context, request)
+        result = view.new()
+        assert result == {"form": view.new_form}
