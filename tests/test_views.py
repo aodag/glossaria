@@ -48,7 +48,7 @@ class TestGlossaryView:
         result = view.index()
         assert result == {"glossaries": [glossary1]}
 
-    def test_new(self, target, models, sql_session, config):
+    def test_create(self, target, models, sql_session, config):
         project1 = models.Project(name="testing")
         sql_session.add(project1)
         sql_session.flush()
@@ -61,7 +61,7 @@ class TestGlossaryView:
         )
         context = testing.DummyResource()
         view = target(context, request)
-        result = view.new()
+        result = view.create()
         assert result["glossary"].name == "testing glossary"
         g = sql_session.query(models.Glossary).filter_by(name=params["name"]).one()
         assert g == result["glossary"]
@@ -93,6 +93,8 @@ class TestGlossaryView:
     def test_delete(self, target, models, sql_session, config):
         from sqlalchemy import inspect
 
+        config.add_route("glossaries", "/glossaries/{project_name}")
+
         glossary1 = models.Glossary(name="glossary1")
         project1 = models.Project(name="testing", glossaries=[glossary1])
         sql_session.add(project1)
@@ -106,3 +108,32 @@ class TestGlossaryView:
         result = view.delete()
         assert result == {}
         assert inspect(glossary1).deleted
+        assert request.response.location == "http://example.com/glossaries/testing"
+
+    def test_detail(self, target, models, sql_session, config):
+        glossary1 = models.Glossary(name="glossary1")
+        project1 = models.Project(name="testing", glossaries=[glossary1])
+        sql_session.add(project1)
+        sql_session.flush()
+
+        request = testing.DummyRequest(
+            matchdict={"project_name": project1.name, "glossary_name": glossary1.name}
+        )
+        context = testing.DummyResource()
+        view = target(context, request)
+        result = view.detail()
+        assert result == {"glossary": glossary1}
+
+    def test_edit(self, target, models, sql_session, config):
+        glossary1 = models.Glossary(name="glossary1")
+        project1 = models.Project(name="testing", glossaries=[glossary1])
+        sql_session.add(project1)
+        sql_session.flush()
+
+        request = testing.DummyRequest(
+            matchdict={"project_name": project1.name, "glossary_name": glossary1.name}
+        )
+        context = testing.DummyResource()
+        view = target(context, request)
+        result = view.edit()
+        assert result == {"glossary": glossary1}
