@@ -52,7 +52,9 @@ class TestGlossaryView:
         project1 = models.Project(name="testing")
         sql_session.add(project1)
         sql_session.flush()
-        config.add_route("glossary", "/glossaries/{project_name}/{glossary_name}")
+        config.add_route(
+            "glossary.detail", "/glossaries/{project_name}/{glossary_name}"
+        )
 
         params = dict(name="testing glossary", description="this is testing glossary")
 
@@ -76,7 +78,9 @@ class TestGlossaryView:
         project1 = models.Project(name="testing", glossaries=[glossary1])
         sql_session.add(project1)
         sql_session.flush()
-        config.add_route("glossary", "/glossaries/{project_name}/{glossary_name}")
+        config.add_route(
+            "glossary.detail", "/glossaries/{project_name}/{glossary_name}"
+        )
 
         params = dict(name="testing glossary", description="this is testing glossary")
 
@@ -93,7 +97,7 @@ class TestGlossaryView:
     def test_delete(self, target, models, sql_session, config):
         from sqlalchemy import inspect
 
-        config.add_route("glossaries", "/glossaries/{project_name}")
+        config.add_route("glossaries.index", "/glossaries/{project_name}")
 
         glossary1 = models.Glossary(name="glossary1")
         project1 = models.Project(name="testing", glossaries=[glossary1])

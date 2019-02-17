@@ -46,13 +46,22 @@ class GlossaryView:
         return Form(schema.GlossaryEditSchema())
 
     def collection_url(self):
-        return self.request.route_url("glossaries", project_name=self.project_name)
+        return self.request.route_url(
+            "glossaries.index", project_name=self.project_name
+        )
 
     def member_url(self, glossary):
         return self.request.route_url(
-            "glossary", project_name=glossary.project.name, glossary_name=glossary.name
+            "glossary.detail",
+            project_name=glossary.project.name,
+            glossary_name=glossary.name,
         )
 
+    @view_config(
+        route_name="glossaries.index",
+        renderer="templates/glossaries_index.html",
+        request_method="GET",
+    )
     def index(self):
         project_name = self.project_name
         glossaries = Glossary.query.filter(
@@ -60,15 +69,35 @@ class GlossaryView:
         ).all()
         return dict(glossaries=glossaries)
 
+    @view_config(
+        route_name="glossaries.detail",
+        renderer="templates/glossaries_detail.html",
+        request_method="GET",
+    )
     def detail(self):
         return dict(glossary=self.glossary)
 
+    @view_config(
+        route_name="glossaries.edit",
+        renderer="templates/glossaries_edit.html",
+        request_method="GET",
+    )
     def edit(self):
         return dict(glossary=self.glossary, form=self.edit_form)
 
+    @view_config(
+        route_name="glossaries.new",
+        renderer="templates/glossaries_new.html",
+        request_method="GET",
+    )
     def new(self):
         return dict(form=self.new_form)
 
+    @view_config(
+        route_name="glossaries.create",
+        renderer="templates/glossaries_create.html",
+        request_method="POST",
+    )
     def create(self):
         try:
             params = self.new_form.validate(self.controls)
@@ -85,6 +114,11 @@ class GlossaryView:
         self.request.response.location = location
         return dict(glossary=glossary)
 
+    @view_config(
+        route_name="glossaries.update",
+        renderer="templates/glossaries_update.html",
+        request_method="POST",
+    )
     def update(self):
         try:
             params = self.edit_form.validate(self.controls)
@@ -100,6 +134,11 @@ class GlossaryView:
 
         return dict(glossary=glossary)
 
+    @view_config(
+        route_name="glossaries.delete",
+        renderer="templates/glossaries_delete.html",
+        request_method="POST",
+    )
     def delete(self):
         glossary = self.glossary
         Session.delete(glossary)
